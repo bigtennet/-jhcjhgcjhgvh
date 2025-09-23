@@ -26,7 +26,8 @@
     items: [newItem()],
     discount: 0,
     taxRate: 0,
-    notes: ''
+    notes: '',
+    payment: { title: 'Pay via Link / Bank / UPI', value: '', showQr: false }
   };
 
   function newItem() { return { description: '', quantity: 1, price: 0 }; }
@@ -81,6 +82,11 @@
     currency.addEventListener('change', () => { state.currency = currency.value; saveState(); renderTotals(); });
     // Notes
     attachInput('notes', (v) => state.notes = v, renderNotes);
+    // Payment
+    attachInput('paymentTitle', (v) => state.payment.title = v, renderPayment);
+    attachInput('paymentValue', (v) => state.payment.value = v, renderPayment);
+    const showQr = byId('showQr');
+    showQr.addEventListener('change', () => { state.payment.showQr = showQr.checked; saveState(); renderPayment(); });
     // Logo
     const logoInput = byId('logoInput');
     logoInput.addEventListener('change', async (e) => {
@@ -243,9 +249,35 @@
     byId('taxRate').value = state.taxRate || 0;
 
     byId('notes').value = state.notes || '';
+
+    byId('paymentTitle').value = state.payment.title || '';
+    byId('paymentValue').value = state.payment.value || '';
+    byId('showQr').checked = !!state.payment.showQr;
   }
 
   function renderNotes() { byId('notesPreview').textContent = state.notes || ''; }
+
+  async function renderPayment() {
+    byId('paymentTitlePreview').textContent = state.payment.title || '';
+    const textPreview = byId('paymentTextPreview');
+    textPreview.textContent = state.payment.value || '';
+    const paymentBlock = document.getElementById('paymentBlock');
+    const canvas = document.getElementById('qrCanvas');
+    if (!paymentBlock || !canvas) return;
+
+    if (state.payment.showQr && state.payment.value) {
+      try {
+        canvas.style.display = 'block';
+        await QRCode.toCanvas(canvas, state.payment.value, { margin: 1, width: 148 });
+      } catch (_) {
+        canvas.style.display = 'none';
+      }
+    } else {
+      canvas.style.display = 'none';
+      const ctx = canvas.getContext('2d');
+      ctx && ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  }
 
   function renderInvoiceTable() {
     const tbody = byId('invoiceTableBody');
@@ -304,50 +336,19 @@
 
     byId('btn-print').addEventListener('click', () => window.print());
 
-    byId('btn-pdf').addEventListener('click', async () => {
-      await downloadPdf();
-    });
+    byId('btn-pdf').addEventListener('click', async () => { await downloadPdf(); });
   }
 
   async function downloadPdf() {
     const invoiceEl = byId('invoice');
-    const scale = 2; // higher for sharper
-    const canvas = await html2canvas(invoiceEl, { scale, backgroundColor: '#ffffff' });
-    const imgData = canvas.toDataURL('image/png');
-
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF('p', 'pt', 'a4');
-
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-
-    const imgWidth = pageWidth - 40; // margin 20
-    const imgHeight = canvas.height * (imgWidth / canvas.width);
-
-    let y = 20;
-    if (imgHeight > pageHeight - 40) {
-      // Multi-page
-      let remaining = imgHeight;
-      const pageCanvas = document.createElement('canvas');
-      const pageCtx = pageCanvas.getContext('2d');
-      const ratio = imgWidth / canvas.width;
-      pageCanvas.width = canvas.width;
-      pageCanvas.height = Math.floor((pageHeight - 40) / ratio);
-
-      while (remaining > 0) {
-        const sy = Math.floor((imgHeight - remaining) / ratio);
-        pageCtx.clearRect(0, 0, pageCanvas.width, pageCanvas.height);
-        pageCtx.drawImage(canvas, 0, sy, canvas.width, pageCanvas.height, 0, 0, pageCanvas.width, pageCanvas.height);
-        const pageData = pageCanvas.toDataURL('image/png');
-        if (y > 20) pdf.addPage();
-        pdf.addImage(pageData, 'PNG', 20, 20, imgWidth, pageHeight - 40);
-        remaining -= (pageHeight - 40);
-      }
-    } else {
-      pdf.addImage(imgData, 'PNG', 20, y, imgWidth, imgHeight);
-    }
-
-    pdf.save((state.meta.number || 'invoice') + '.pdf');
+    const opt = {
+      margin:       [0.5, 0.5, 0.5, 0.5],
+      filename:     (state.meta.number || 'invoice') + '.pdf',
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+      jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+    };
+    await html2pdf().set(opt).from(invoiceEl).save();
   }
 
   /** Hydrate and Render **/
@@ -359,10 +360,11 @@
     renderClient();
     renderInvoiceMeta();
     renderNotes();
+    renderPayment();
     renderInvoiceTable();
   }
 
-  function render() { renderBrand(); renderClient(); renderInvoiceMeta(); renderInvoiceTable(); renderTotals(); renderNotes(); }
+  function render() { renderBrand(); renderClient(); renderInvoiceMeta(); renderInvoiceTable(); renderTotals(); renderNotes(); renderPayment(); }
 
   /** Init **/
   function init() {

@@ -133,6 +133,24 @@ Metropolis, USA"></textarea>
           <h2>Notes</h2>
           <textarea id="notes" rows="4" placeholder="Payment is due in 14 days. Thank you for your business!"></textarea>
         </div>
+
+        <div class="card">
+          <h2>Payment & QR</h2>
+          <div class="grid two">
+            <div class="field">
+              <label for="paymentTitle">Payment Title</label>
+              <input id="paymentTitle" placeholder="Pay via Link / Bank / UPI" />
+            </div>
+            <div class="field">
+              <label for="paymentValue">Payment Link or Text</label>
+              <input id="paymentValue" placeholder="https://pay.me/yourlink or banking details" />
+            </div>
+          </div>
+          <div class="field inline">
+            <label for="showQr">Show QR on invoice</label>
+            <input id="showQr" type="checkbox" />
+          </div>
+        </div>
       </section>
 
       <section class="preview">
@@ -185,7 +203,12 @@ Metropolis, USA"></textarea>
           </table>
 
           <div class="inv-summary">
-            <div class="spacer"></div>
+            <div class="payment" id="paymentBlock">
+              <div class="muted">Payment</div>
+              <div id="paymentTitlePreview" class="pay-title">Pay via Link / Bank / UPI</div>
+              <div id="paymentTextPreview" class="pay-text"></div>
+              <canvas id="qrCanvas" width="148" height="148"></canvas>
+            </div>
             <div class="sum">
               <div class="row"><span>Subtotal</span><span id="pSubtotal">-</span></div>
               <div class="row"><span>Discount</span><span id="pDiscount">-</span></div>
@@ -206,8 +229,8 @@ Metropolis, USA"></textarea>
       <div>Built with ❤️. Keep it simple and get paid.</div>
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" integrity="sha256-1b1LGX7IhdoJKiSp/u4P0T3sJ3mA1PvXQlyTzRSC0Ak=" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js" integrity="sha256-C92+Uakv+exS3T72s0nn1nAGG7VYpT6V2Qn2Hpjnu1I=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js" integrity="sha256-5n1P54w4mxb9QK7zN2y6n9v9l9c4fdoe4e2m9o0wF6U=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js" integrity="sha256-c7n8zYgmq7y5T7n7bW3mLJpJc2S8t3l8G4JqQ4s3hCE=" crossorigin="anonymous"></script>
     <script src="./app.js"></script>
   </body>
   </html>

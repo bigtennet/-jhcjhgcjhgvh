@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Instant Invoice & Receipt Generator</title>
+    <meta name="description" content="Create professional invoices fast. Download PDF or print.">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='48' x='8' font-size='48'%3E%F0%9F%93%9D%3C/text%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <header class="app-header">
+      <h1>Invoice & Receipt Generator</h1>
+      <div class="header-actions">
+        <button id="btn-new" class="btn secondary" type="button">New</button>
+        <button id="btn-save" class="btn secondary" type="button">Save</button>
+        <button id="btn-load" class="btn secondary" type="button">Load</button>
+        <button id="btn-print" class="btn" type="button">Print</button>
+        <button id="btn-pdf" class="btn primary" type="button">Download PDF</button>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="editor">
+        <div class="card">
+          <h2>Your Business</h2>
+          <div class="grid two">
+            <div class="field">
+              <label for="businessName">Business Name</label>
+              <input id="businessName" placeholder="Acme Co." />
+            </div>
+            <div class="field">
+              <label for="businessEmail">Email</label>
+              <input id="businessEmail" placeholder="hello@acme.com" />
+            </div>
+          </div>
+          <div class="grid two">
+            <div class="field">
+              <label for="businessPhone">Phone</label>
+              <input id="businessPhone" placeholder="+1 (555) 000-0000" />
+            </div>
+            <div class="field">
+              <label for="businessWebsite">Website</label>
+              <input id="businessWebsite" placeholder="acme.com" />
+            </div>
+          </div>
+          <div class="grid two">
+            <div class="field">
+              <label for="businessAddress">Address</label>
+              <textarea id="businessAddress" rows="2" placeholder="123 Market St
+Springfield, USA"></textarea>
+            </div>
+            <div class="field">
+              <label for="logoInput">Logo</label>
+              <input id="logoInput" type="file" accept="image/*" />
+              <small>PNG/SVG/JPG. Square works best.</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Client</h2>
+          <div class="grid two">
+            <div class="field">
+              <label for="clientName">Client Name</label>
+              <input id="clientName" placeholder="Client LLC" />
+            </div>
+            <div class="field">
+              <label for="clientEmail">Email</label>
+              <input id="clientEmail" placeholder="billing@client.com" />
+            </div>
+          </div>
+          <div class="grid two">
+            <div class="field">
+              <label for="clientAddress">Address</label>
+              <textarea id="clientAddress" rows="2" placeholder="456 Client Rd
+Metropolis, USA"></textarea>
+            </div>
+            <div class="field">
+              <label for="currency">Currency</label>
+              <select id="currency">
+                <option value="USD" selected>USD</option>
+                <option value="EUR">EUR</option>
+                <option value="GBP">GBP</option>
+                <option value="CAD">CAD</option>
+                <option value="AUD">AUD</option>
+                <option value="INR">INR</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="flex between v-center">
+            <h2>Items</h2>
+            <div>
+              <button id="btn-add-item" class="btn small" type="button">+ Add Item</button>
+            </div>
+          </div>
+          <div class="items-head grid four">
+            <div>Description</div>
+            <div>Qty</div>
+            <div>Price</div>
+            <div>Total</div>
+          </div>
+          <div id="items"></div>
+
+          <div class="grid two totals">
+            <div></div>
+            <div>
+              <div class="field inline">
+                <label for="discount">Discount</label>
+                <input id="discount" type="number" min="0" step="0.01" placeholder="0" />
+              </div>
+              <div class="field inline">
+                <label for="taxRate">Tax %</label>
+                <input id="taxRate" type="number" min="0" step="0.01" placeholder="0" />
+              </div>
+              <div class="summary">
+                <div class="row"><span>Subtotal</span><span id="subtotalDisplay">-</span></div>
+                <div class="row"><span>Discount</span><span id="discountDisplay">-</span></div>
+                <div class="row"><span>Tax</span><span id="taxDisplay">-</span></div>
+                <div class="row grand"><span>Total</span><span id="totalDisplay">-</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Notes</h2>
+          <textarea id="notes" rows="4" placeholder="Payment is due in 14 days. Thank you for your business!"></textarea>
+        </div>
+      </section>
+
+      <section class="preview">
+        <div id="invoice" class="invoice">
+          <div class="inv-header">
+            <div class="brand">
+              <img id="logoPreview" alt="Logo" />
+              <div>
+                <div id="businessNamePreview" class="brand-name">Business Name</div>
+                <div id="businessContactPreview" class="brand-contact">email • phone • website</div>
+                <div id="businessAddressPreview" class="brand-address">Address</div>
+              </div>
+            </div>
+            <div class="inv-meta">
+              <div class="inv-title">INVOICE</div>
+              <div class="meta-row">
+                <span>No.</span>
+                <input id="invoiceNumber" placeholder="#0001" />
+              </div>
+              <div class="meta-row">
+                <span>Date</span>
+                <input id="invoiceDate" type="date" />
+              </div>
+              <div class="meta-row">
+                <span>Due</span>
+                <input id="invoiceDue" type="date" />
+              </div>
+            </div>
+          </div>
+
+          <div class="billto">
+            <div>
+              <div class="muted">Bill To</div>
+              <div id="clientNamePreview" class="to-name">Client Name</div>
+              <div id="clientAddressPreview" class="to-address">Client Address</div>
+              <div id="clientEmailPreview" class="to-email">client@email.com</div>
+            </div>
+          </div>
+
+          <table class="inv-table" id="invoiceTable">
+            <thead>
+              <tr>
+                <th>Description</th>
+                <th>Qty</th>
+                <th>Price</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody id="invoiceTableBody"></tbody>
+          </table>
+
+          <div class="inv-summary">
+            <div class="spacer"></div>
+            <div class="sum">
+              <div class="row"><span>Subtotal</span><span id="pSubtotal">-</span></div>
+              <div class="row"><span>Discount</span><span id="pDiscount">-</span></div>
+              <div class="row"><span>Tax</span><span id="pTax">-</span></div>
+              <div class="row grand"><span>Total</span><span id="pTotal">-</span></div>
+            </div>
+          </div>
+
+          <div class="inv-notes">
+            <div class="muted">Notes</div>
+            <div id="notesPreview"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <div>Built with ❤️. Keep it simple and get paid.</div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" integrity="sha256-1b1LGX7IhdoJKiSp/u4P0T3sJ3mA1PvXQlyTzRSC0Ak=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js" integrity="sha256-C92+Uakv+exS3T72s0nn1nAGG7VYpT6V2Qn2Hpjnu1I=" crossorigin="anonymous"></script>
+    <script src="./app.js"></script>
+  </body>
+  </html>
+
